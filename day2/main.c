@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <limits.h>
 
-int is_well_increasing(int t[UCHAR_MAX], size_t nmemb) {
+#define LENGTH_MAX 100
+
+int is_well_increasing(int t[LENGTH_MAX], size_t nmemb) {
   if (nmemb < 2) {
     return -1;
   }
@@ -20,7 +21,7 @@ int is_well_increasing(int t[UCHAR_MAX], size_t nmemb) {
   return result;
 }
 
-int is_well_decreasing(int t[UCHAR_MAX], size_t nmemb) {
+int is_well_decreasing(int t[LENGTH_MAX], size_t nmemb) {
   int result = 0;
   for (size_t k = 0; k < nmemb - 1; ++k) {
     if (t[k] <= t[k + 1]) {
@@ -35,17 +36,34 @@ int is_well_decreasing(int t[UCHAR_MAX], size_t nmemb) {
   return result;
 }
 
+int is_safe_with_pop(int t[LENGTH_MAX], size_t nmemb) {
+  for (size_t i = 0; i < nmemb; ++i) {
+    int tp[LENGTH_MAX];
+    size_t k = 0;
+    for (size_t j = 0; j < nmemb; ++j) {
+      if (j != i) {
+        tp[k] = t[j];
+        ++k;
+      }
+    }
+    if (is_well_increasing(tp, k) != -1 || is_well_decreasing(tp, k) != -1) {
+      return 1;
+    }
+  }
+  return -1;
+}
+
 int main() {
   int r = EXIT_SUCCESS;
-  char *w = malloc(UCHAR_MAX + 1);
+  char *w = malloc(LENGTH_MAX + 1);
   if (w == nullptr) {
     goto errors;
   }
   int x;
-  int t[UCHAR_MAX];
+  int t[LENGTH_MAX];
   size_t k = 0;
   int result = 0;
-  while (fgets(w, UCHAR_MAX, stdin) != nullptr) {
+  while (fgets(w, LENGTH_MAX, stdin) != nullptr) {
     char *p = w;
     while (sscanf(p, "%d", &x) == 1) {
       while (*p != '\0' && *p != ' ') {
@@ -57,14 +75,9 @@ int main() {
       t[k] = x;
       ++k;
     }
-    for (size_t x = 0; x < k; ++x){
-      printf("%d ", t[x]);
-    }
-    printf("\n");
-    if (is_well_decreasing(t, k) != -1) {
+    if (is_well_decreasing(t, k) != -1 || is_well_increasing(t, k) != -1) {
       result += 1;
-    }
-    if (is_well_increasing(t, k) != -1) {
+    } else if (is_safe_with_pop(t, k) != -1) {
       result += 1;
     }
     k = 0;
